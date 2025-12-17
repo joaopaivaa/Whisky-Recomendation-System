@@ -24,7 +24,7 @@ df = df[~((df['review_score'].isna()) | (df['review_score'] == ''))]
 df['review_score'] = df['review_score'].astype(int, errors='ignore')
 df = df[(df['review_score'] >= 80) & (df['review_score'] <= 100)]
 
-df = df[['review_title', 'review_full_text']]
+df = df[['review_title', 'review_full_text', 'review_score']]
 
 df['review_full_text'] = df['review_full_text'].str.lower().str.replace('-', ' ')
 
@@ -345,9 +345,9 @@ review_text_vec = counter.fit_transform(df['review_full_text_processed']).toarra
 
 df['review_text_vector'] = review_text_vec.tolist()
 
-df = df[['review_title', 'review_text_vector']]
+df = df[['review_title', 'review_text_vector', 'review_score']]
 
-df.to_csv('reviews_vectors.csv', index=False)
+#df.to_csv('reviews_vectors.csv', index=False)
 
 df_tasting_notes = []
 
@@ -376,13 +376,13 @@ tasting_notes_groups = {
         "grapefruit", "lemon", "lime", "mango", "melon", "orange", "peach",
         "pear", "pineapple", "plum", "raisin", "jam", "marmalad",
         "gooseberry", "grass", "green", "passion fruit", "tropic",
-        "citrus", "tangerin", "zest", "juicy", 'gooseberry', 'fruit',
-        "ripe", "stew", "peel", 'sour', 'cherry', "raisin", "jam", 'raspberry',
-        'mint', "sherry", "wine", "liqueur"
+        "citrus", "tangerin", "zest", "juicy", 'fruit', "ripe", "stew",
+        "peel", 'sour', 'cherry', "raisin", "jam", 'raspberry',
+        "sherry", "wine", "liqueur"
     ],
 
     "floral": [
-        "floral", "heather", "herb", "leafy", "fresh", 'tea'
+        "floral", "heather", "herb", "leafy", "fresh", 'tea', 'mint'
     ],
 
     "spicy": [
@@ -450,41 +450,46 @@ df = df.merge(df_tasting_notes_group, how='left', on='tasting_note')
 
 df_total_tasting_notes = df.groupby(['review_title']).agg(total_tasting_notes=("has_tasting_note", "sum")).reset_index()
 
-df_total_tasting_notes_group = df.groupby(['review_title', 'tasting_notes_group']).agg(total_tasting_notes_group=("has_tasting_note", "sum")).reset_index()
+df_total_tasting_notes_group = df.groupby(['review_title', 'tasting_notes_group', 'review_score']).agg(total_tasting_notes_group=("has_tasting_note", "sum")).reset_index()
 
 df_tasting_notes_group = df_total_tasting_notes_group.merge(df_total_tasting_notes, how='left', on='review_title')
 df_tasting_notes_group['perc_tasting_notes_group'] = round(df_tasting_notes_group['total_tasting_notes_group'] / df_tasting_notes_group['total_tasting_notes'], 2)
 df_tasting_notes_group = df_tasting_notes_group.drop(['total_tasting_notes_group', 'total_tasting_notes'], axis=1)
+
+df_tasting_notes_group = df_tasting_notes_group.sort_values("review_score", ascending=False).drop_duplicates(subset=['review_title', 'tasting_notes_group'])
+
 df_tasting_notes_group = df_tasting_notes_group.sort_values(['review_title', 'tasting_notes_group'])
+
+df_tasting_notes_group = df_tasting_notes_group[~df_tasting_notes_group['perc_tasting_notes_group'].isna()].reset_index(drop=True)
 
 df_tasting_notes_group.to_csv('flavour_wheel_long.csv', index=False)
 
-flavour_wheel_values = (
-  df_tasting_notes_group
-  .groupby('review_title')['perc_tasting_notes_group']
-  .apply(list)
-  .reset_index(name='flavour_wheel_values')
-)
+# flavour_wheel_values = (
+#   df_tasting_notes_group
+#   .groupby('review_title')['perc_tasting_notes_group']
+#   .apply(list)
+#   .reset_index(name='flavour_wheel_values')
+# )
 
-flavour_wheel_values.to_csv('flavour_wheel.csv', index=False)
+# flavour_wheel_values.to_parquet("flavour_wheel.parquet", index=False)
 
-df = df.merge(df_tasting_notes_group, how='left', on=['review_title', 'tasting_notes_group'])
-df = df.drop('has_tasting_note', axis=1)
+# df = df.merge(df_tasting_notes_group, how='left', on=['review_title', 'tasting_notes_group'])
+# df = df.drop('has_tasting_note', axis=1)
 
-df[df['tasting_notes_group'].isna()]['tasting_note'].unique()
+# df[df['tasting_notes_group'].isna()]['tasting_note'].unique()
 
-freq = review_text_vec.sum(axis=0)
+# freq = review_text_vec.sum(axis=0)
 
-freq_df = pd.DataFrame({
-    'word': counter.get_feature_names_out(),
-    'frequency': freq
-}).sort_values(by='frequency', ascending=False).reset_index(drop=True)
+# freq_df = pd.DataFrame({
+#     'word': counter.get_feature_names_out(),
+#     'frequency': freq
+# }).sort_values(by='frequency', ascending=False).reset_index(drop=True)
 
-print(freq_df)
+# print(freq_df)
 
-words_freq = (review_text_vec.T @ review_text_vec)
+# words_freq = (review_text_vec.T @ review_text_vec)
 
-df_words_freq = pd.DataFrame(words_freq, columns=tasting_notes_words_filtered, index=tasting_notes_words_filtered)
-np.fill_diagonal(df_words_freq.values, -1)
+# df_words_freq = pd.DataFrame(words_freq, columns=tasting_notes_words_filtered, index=tasting_notes_words_filtered)
+# np.fill_diagonal(df_words_freq.values, -1)
 
-df_words_freq
+# df_words_freq
