@@ -1,2 +1,4 @@
 venv
-.env
+databases
+__pycache__
+dim_distilleries.csv
