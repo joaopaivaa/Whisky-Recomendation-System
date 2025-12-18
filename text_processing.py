@@ -24,6 +24,8 @@ df = df[~((df['review_score'].isna()) | (df['review_score'] == ''))]
 df['review_score'] = df['review_score'].astype(int, errors='ignore')
 df = df[(df['review_score'] >= 80) & (df['review_score'] <= 100)]
 
+df['review_title'] = df['review_title'].str.replace('\n', ' ').str.strip()
+
 df = df[['review_title', 'review_full_text', 'review_score', 'review_image']]
 
 df['review_full_text'] = df['review_full_text'].str.lower().str.replace('-', ' ')
@@ -450,7 +452,7 @@ df = df.merge(df_tasting_notes_group, how='left', on='tasting_note')
 
 df_total_tasting_notes = df.groupby(['review_title']).agg(total_tasting_notes=("has_tasting_note", "sum")).reset_index()
 
-df_total_tasting_notes_group = df.groupby(['review_title', 'tasting_notes_group', 'review_score']).agg(total_tasting_notes_group=("has_tasting_note", "sum")).reset_index()
+df_total_tasting_notes_group = df.groupby(['review_title', 'tasting_notes_group', 'review_score', 'review_image']).agg(total_tasting_notes_group=("has_tasting_note", "sum")).reset_index()
 
 df_tasting_notes_group = df_total_tasting_notes_group.merge(df_total_tasting_notes, how='left', on='review_title')
 df_tasting_notes_group['perc_tasting_notes_group'] = round(df_tasting_notes_group['total_tasting_notes_group'] / df_tasting_notes_group['total_tasting_notes'], 2)
