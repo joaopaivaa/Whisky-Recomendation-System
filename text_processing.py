@@ -16,7 +16,7 @@ def preprocess_text(text):
     text = ' '.join([word for word in text.split() if ((word not in stop_words) and (len(word) >= 3))])
     return text
 
-df = pd.read_csv('databases/whisky_notes.csv', sep=';')
+df = pd.read_csv('databases/raw/whisky_notes.csv', sep=';')
 df = df.drop_duplicates().reset_index(drop=True)
 
 df['review_score'] = df['review_score'].str.replace('+', '').str.replace('.', '')
@@ -464,7 +464,7 @@ df_tasting_notes_group = df_tasting_notes_group.sort_values(['review_title', 'ta
 
 df_tasting_notes_group = df_tasting_notes_group[~df_tasting_notes_group['perc_tasting_notes_group'].isna()].reset_index(drop=True)
 
-df_tasting_notes_group.to_csv('flavour_wheel_long.csv', index=False)
+df_tasting_notes_group.to_csv('databases/gold/flavour_wheel_long.csv', index=False)
 
 # flavour_wheel_values = (
 #   df_tasting_notes_group
