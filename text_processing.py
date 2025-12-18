@@ -16,7 +16,7 @@ def preprocess_text(text):
     text = ' '.join([word for word in text.split() if ((word not in stop_words) and (len(word) >= 3))])
     return text
 
-df = pd.read_csv('C:\\Users\\joaov\\Documents\\Whisky Recomendation System\\Whisky Notes Extraction\\Step 2\\Whisky Notes - Step 2.csv', sep=';')
+df = pd.read_csv('databases/whisky_notes.csv', sep=';')
 df = df.drop_duplicates().reset_index(drop=True)
 
 df['review_score'] = df['review_score'].str.replace('+', '').str.replace('.', '')
