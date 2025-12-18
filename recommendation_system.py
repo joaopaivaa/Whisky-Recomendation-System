@@ -3,7 +3,7 @@ import pandas as pd
 
 def make_recommendation(user_input_vector):
 
-    df_tasting_notes = pd.read_csv("flavour_wheel_long.csv")
+    df_tasting_notes = pd.read_csv("databases/gold/flavour_wheel_long.csv")
 
     df_vectors = (
         df_tasting_notes

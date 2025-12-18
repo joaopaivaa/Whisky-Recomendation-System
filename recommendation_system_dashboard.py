@@ -16,7 +16,7 @@ def load_whiskynotes_image(url):
     loaded_image = Image.open(BytesIO(r.content))
     return loaded_image
 
-df_flavour_wheel = pd.read_csv('flavour_wheel_long.csv')
+df_flavour_wheel = pd.read_csv('databases/gold/flavour_wheel_long.csv')
 
 st.set_page_config(layout='wide')
 
