@@ -2,6 +2,19 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from recommendation_system import make_recommendation
+import requests
+from PIL import Image
+from io import BytesIO
+
+def load_whiskynotes_image(url):
+    headers = {
+        "User-Agent": "Mozilla/5.0",
+        "Referer": "https://www.whiskynotes.be/"
+    }
+    r = requests.get(url, headers=headers, timeout=10)
+    r.raise_for_status()
+    loaded_image = Image.open(BytesIO(r.content))
+    return loaded_image
 
 df_flavour_wheel = pd.read_csv('flavour_wheel_long.csv')
 
@@ -97,7 +110,7 @@ else:
 
     st.subheader(recommended_bottle)
 
-    col_chart, col_score = st.columns([3, 2], vertical_alignment='center')
+    col_chart, col_image, col_score = st.columns([3, 1, 1], vertical_alignment='center')
 
     with col_chart:
         
@@ -107,5 +120,12 @@ else:
 
         bottle_grade = df_recommended_bottle['review_score'].values[0]
 
-        st.metric(label='Score on Whisky Notes',
-                  value=f"{bottle_grade}/100")
+        st.metric(label='Score on Whisky Notes', value=f"{bottle_grade}/100")
+        
+    with col_image:
+    
+        bottle_image = df_recommended_bottle['review_image'].values[0]
+        loaded_image = load_whiskynotes_image(bottle_image)
+
+        st.space('small')
+        st.image(loaded_image, width=100)
